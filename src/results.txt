@@ -1,0 +1,12 @@
+Epoch [1/5] Train Loss: 0.3505 Val Loss: 0.3447 Precision: 0.7244 Recall: 0.6278 F1: 0.6618
+Best model saved!
+
+Epoch [2/5] Train Loss: 0.2847 Val Loss: 0.3002 Precision: 0.8522 Recall: 0.6055 F1: 0.6198
+Best model saved!
+
+Epoch [3/5] Train Loss: 0.2307 Val Loss: 0.2931 Precision: 0.8071 Recall: 0.6489 F1: 0.6680
+Best model saved!
+
+Epoch [4/5] Train Loss: 0.1980 Val Loss: 0.4967 Precision: 0.6758 Recall: 0.5998 F1: 0.5780
+
+Epoch [5/5] Train Loss: 0.1638 Val Loss: 0.3581 Precision: 0.8258 Recall: 0.5950 F1: 0.6332
