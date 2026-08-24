@@ -21,7 +21,7 @@ The model can identify six types of damage:
 * Lamp Broken
 * Tire Flat
 
-The project was completed in two phases: a baseline model followed by model improvement using augmentation, fine-tuning, and class-specific thresholds.
+The project was developed in two phases: a baseline model followed by model improvement using data augmentation, fine-tuning, class-specific threshold tuning, and evaluation on an unseen test set.
 
 ---
 
@@ -38,10 +38,6 @@ The first phase included:
 * Precision, Recall, and F1-score evaluation
 * Best model checkpoint saving
 
-### Baseline Result
-
-**Macro F1: ~0.67**
-
 ---
 
 ## 🚀 Phase 2 — Model Improvement
@@ -52,14 +48,42 @@ The baseline model was improved using:
 * Fine-tuning
 * Class-specific probability thresholds
 * Best model checkpoint saving
-* Prediction on unseen images
-* Training and model comparison visualizations
+* Prediction on new images
+* Training and evaluation visualizations
+* Final evaluation on the unseen test set
 
 ---
 
-## 📊 Dataset
+## 📦 Dataset
 
-The project uses the **CarDD (Car Damage Detection)** dataset.
+This project uses the **Car Damage Detection (CarDD)** dataset.
+
+### Download
+
+The dataset can be downloaded from Kaggle:
+
+**[Car Damage Detection — Kaggle](https://www.kaggle.com/datasets/nasimetemadi/car-damage-detection)**
+
+After downloading the dataset, extract the image files into:
+
+```text
+dataset/
+└── CarDD_COCO/
+    ├── train2017/
+    ├── val2017/
+    └── test2017/
+```
+
+The dataset split CSV files are already included in this repository:
+
+```text
+data/
+├── train.csv
+├── val.csv
+└── test.csv
+```
+
+Therefore, after cloning the repository, the only additional step required is downloading the CarDD image dataset from Kaggle and placing it in the expected directory.
 
 ### Dataset Statistics
 
@@ -114,7 +138,7 @@ Training images were augmented using:
 * Random rotation
 * Color jitter
 
-Validation images were resized and normalized without random augmentation.
+Validation and test images were resized and normalized without random augmentation.
 
 ---
 
@@ -128,44 +152,47 @@ This allowed the pretrained model to adapt its learned features to car damage pa
 
 ## 🎯 Class-Specific Thresholds
 
-Because this is a multi-label classification problem, a separate probability threshold was optimized for each damage class using the validation set.
+Since this is a multi-label classification problem, a separate probability threshold was selected for each damage class.
 
-| Damage Type   | Threshold |
-| ------------- | --------: |
-| Dent          |      0.35 |
-| Scratch       |      0.45 |
-| Crack         |      0.20 |
-| Glass Shatter |      0.50 |
-| Lamp Broken   |      0.30 |
-| Tire Flat     |      0.35 |
+Thresholds were optimized **only using the validation set**.
+
+The final thresholds were:
+
+| Damage Type   | Validation Threshold |
+| ------------- | -------------------: |
+| Dent          |                 0.35 |
+| Scratch       |                 0.45 |
+| Crack         |                 0.20 |
+| Glass Shatter |                 0.50 |
+| Lamp Broken   |                 0.30 |
+| Tire Flat     |                 0.35 |
+
+These thresholds were then kept fixed and used for the final evaluation on the unseen test set.
+
+The test set was **not used for threshold selection**.
 
 ---
 
-## 🏆 Results
+## 🏆 Final Test Results
 
-The model improved throughout the development process:
+The final model was evaluated on the **unseen test set** using the fixed thresholds selected from the validation set.
 
-| Model                           | Macro F1 |
-| ------------------------------- | -------: |
-| Baseline                        |    ~0.67 |
-| Augmentation + Threshold Tuning |     0.76 |
-| Fine-tuning + Threshold Tuning  | **0.80** |
+### Final Test Macro F1: **0.76**
 
-### Final Classification Report
+| Damage Type          | Precision |   Recall | F1-score | Support |
+| -------------------- | --------: | -------: | -------: | ------: |
+| Dent                 |      0.72 |     0.87 |     0.79 |     157 |
+| Scratch              |      0.71 |     0.92 |     0.80 |     183 |
+| Crack                |      0.41 |     0.58 |     0.48 |      48 |
+| Glass Shatter        |      0.98 |     0.82 |     0.89 |      71 |
+| Lamp Broken          |      0.63 |     0.83 |     0.72 |      65 |
+| Tire Flat            |      0.96 |     0.81 |     0.88 |      31 |
+| **Macro Average**    |  **0.73** | **0.80** | **0.76** | **555** |
+| **Weighted Average** |  **0.73** | **0.85** | **0.78** | **555** |
 
-| Damage Type       | Precision |   Recall | F1-score |
-| ----------------- | --------: | -------: | -------: |
-| Dent              |      0.76 |     0.82 |     0.79 |
-| Scratch           |      0.74 |     0.91 |     0.82 |
-| Crack             |      0.52 |     0.66 |     0.58 |
-| Glass Shatter     |      1.00 |     0.97 | **0.98** |
-| Lamp Broken       |      0.69 |     0.83 |     0.75 |
-| Tire Flat         |      0.96 |     0.85 | **0.90** |
-| **Macro Average** |  **0.78** | **0.84** | **0.80** |
+The strongest performance was achieved on **Scratch**, **Tire Flat**, and **Dent**.
 
-The strongest performance was achieved on **glass shatter** and **tire flat**.
-
-The most challenging class was **crack**.
+The most challenging class was **Crack**, with an F1-score of 0.48.
 
 ---
 
@@ -173,11 +200,15 @@ The most challenging class was **crack**.
 
 ### Fine-tuning Loss
 
+The following plot shows the training and validation loss during fine-tuning.
+
 ![Fine-tuning Loss](results/loss_curve.png)
 
-### Model Performance Comparison
+### Final Test Performance
 
-![Model Comparison](results/model_comparison.png)
+The final Macro F1 score on the unseen test set is **0.76**.
+
+![Final Test Performance](results/final_test_f1.png)
 
 ---
 
@@ -208,7 +239,7 @@ crack           74.75%
 lamp_broken     52.48%
 ```
 
-The prediction script uses the optimized class-specific thresholds.
+The prediction script uses the class-specific thresholds selected using the validation set.
 
 ---
 
@@ -224,10 +255,13 @@ car-damage-classification/
 │
 ├── dataset/
 │   └── CarDD_COCO/
+│       ├── train2017/
+│       ├── val2017/
+│       └── test2017/
 │
 ├── results/
 │   ├── loss_curve.png
-│   └── model_comparison.png
+│   └── final_test_f1.png
 │
 ├── src/
 │   ├── dataset.py
@@ -238,13 +272,16 @@ car-damage-classification/
 │   ├── train_augmented.py
 │   ├── train_finetune.py
 │   ├── predict.py
-│   ├── tune_threshold_augmented.py
+│   ├── plot_results.py
 │   ├── evaluate_augmented.py
-│   ├── tune_threshold_finetuned.py
-│   └── evaluate_finetuned.py
+│   ├── evaluate_finetuned.py
+│   ├── evaluate_test.py
+│   ├── tune_threshold_augmented.py
+│   └── tune_threshold_finetuned.py
 │
 ├── .gitignore
-└── README.md
+├── README.md
+└── requirements.txt
 ```
 
 ---
@@ -260,10 +297,24 @@ car-damage-classification/
 * Pillow
 * Matplotlib
 
-Install the required packages:
+The project dependencies and tested versions are listed in `requirements.txt`.
+
+Install them with:
 
 ```bash
-pip install torch torchvision pandas numpy scikit-learn pillow matplotlib
+pip install -r requirements.txt
+```
+
+### Tested Environment
+
+```text
+torch==2.13.0+cu132
+torchvision==0.28.0+cu132
+numpy==2.5.2
+pandas==3.0.5
+scikit-learn==1.9.0
+Pillow==12.3.0
+matplotlib==3.11.1
 ```
 
 ---
@@ -282,6 +333,72 @@ The project automatically selects CUDA when available:
 device = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )
+```
+
+---
+
+## ▶️ Running the Project
+
+After cloning the repository:
+
+### 1. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Download the CarDD dataset
+
+Download the dataset from:
+
+**[Car Damage Detection — Kaggle](https://www.kaggle.com/datasets/nasimetemadi/car-damage-detection)**
+
+Extract the image dataset into:
+
+```text
+dataset/CarDD_COCO/
+```
+
+### 3. Train the baseline model
+
+```bash
+python src/train.py
+```
+
+### 4. Train with augmentation
+
+```bash
+python src/train_augmented.py
+```
+
+### 5. Fine-tune the model
+
+```bash
+python src/train_finetune.py
+```
+
+### 6. Find validation thresholds
+
+```bash
+python src/tune_threshold_finetuned.py
+```
+
+### 7. Evaluate on the unseen test set
+
+```bash
+python src/evaluate_test.py
+```
+
+### 8. Generate result plots
+
+```bash
+python src/plot_results.py
+```
+
+### 9. Predict a new image
+
+```bash
+python src/predict.py path/to/image.jpg
 ```
 
 ---
